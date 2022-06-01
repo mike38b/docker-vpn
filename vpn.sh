@@ -13,7 +13,7 @@ openvpn() {
     local authorizedKeys="${AUTHORIZED_KEYS}"
     
     local vpnConfig="$HOME/.vpn"
-    local dockerImage="ethack/vpn"
+    local dockerImage="m/vpn"
     
     # AUTHORIZED_KEYS not specified. Use some defaults.
     if [ -z "$authorizedKeys" ]; then
@@ -28,6 +28,8 @@ openvpn() {
         # append any public key files found in the user's .ssh directory
         authorizedKeys+=$(find "$HOME/.ssh/" -type f -name '*.pub' -exec cat {} \;)
     fi
+
+    docker-build-vpn
 
     local dockerCmd=("docker" "run")
     local vpnCmd=("openvpn")
@@ -82,7 +84,7 @@ openconnect() {
     local authorizedKeys="${AUTHORIZED_KEYS}"
     
     local vpnConfig="$HOME/.vpn"
-    local dockerImage="ethack/vpn"
+    local dockerImage="m/vpn"
     
     # AUTHORIZED_KEYS not specified. Use some defaults.
     if [ -z "$authorizedKeys" ]; then
@@ -97,6 +99,8 @@ openconnect() {
         # append any public key files found in the user's .ssh directory
         authorizedKeys+=$(find "$HOME/.ssh/" -type f -name '*.pub' -exec cat {} \;)
     fi
+
+    docker-build-vpn
 
     local dockerCmd=("docker" "run")
     local vpnCmd=("openconnect")
@@ -160,4 +164,11 @@ Host vpn-$name $name
     NoHostAuthenticationForLocalhost yes
 
 EOF
+}
+
+docker-build-vpn() {
+    if ! docker images | grep -q "m/vpn"; then
+        docker build -t="m/vpn" .
+        sleep 2
+    fi
 }
